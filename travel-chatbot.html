@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#8B5CF6">
+<title>Bytesurge Travels – Travel Assistant</title>
+<style>
+  :root{
+    --ink:#1f1b3a; --muted:#6b6785; --bg:#f6f3ff; --card:#ffffff;
+    --brand:#8B5CF6; --brand-d:#6D28D9; --brand-dd:#4C1D95; --accent:#caba9d; --line:#e6e0fa;
+    --me:#8B5CF6; --bot:#f1ecff; --wa:#25D366;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+  header.hero{background:linear-gradient(135deg,#8B5CF6 0%,#6D28D9 55%,#4C1D95 100%);color:#fff;padding:48px 20px 96px;text-align:center}
+  .brand{display:inline-block;font-size:13px;letter-spacing:.14em;text-transform:uppercase;background:rgba(255,255,255,.16);padding:6px 14px;border-radius:999px;margin-bottom:14px}
+  header.hero h1{margin:0 0 8px;font-size:clamp(26px,5vw,40px)}
+  header.hero p{margin:0;opacity:.92}
+  main{max-width:860px;margin:-64px auto 24px;padding:0 16px}
+  .chat{background:var(--card);border-radius:20px;box-shadow:0 14px 40px rgba(76,29,149,.20);overflow:hidden;display:flex;flex-direction:column;height:640px}
+  .chat-head{display:flex;align-items:center;gap:12px;padding:14px 18px;background:linear-gradient(135deg,#8B5CF6,#6D28D9);color:#fff}
+  .avatar{width:42px;height:42px;border-radius:50%;background:#fff;color:var(--brand-d);display:grid;place-items:center;font-size:21px;flex:none}
+  .chat-head b{display:block}
+  .chat-head small{opacity:.85;display:flex;align-items:center;gap:6px}
+  .chat-head small::before{content:"";width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block}
+  .chat-head .btn{margin-left:auto}
+  #log{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px;background:#fcfbff}
+  .msg{max-width:80%;padding:10px 14px;border-radius:16px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
+  .bot{background:var(--bot);align-self:flex-start;border-bottom-left-radius:4px}
+  .me{background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+  .typing{opacity:.6;font-style:italic}
+  .msg a.cta{display:inline-block;margin-top:8px;margin-right:6px;background:var(--wa);color:#fff;text-decoration:none;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600}
+  .msg a.cta.call{background:var(--brand-d)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;padding:10px 18px;border-top:1px solid var(--line);background:#fff;max-height:100px;overflow-y:auto}
+  .chip{border:1px solid var(--brand);color:var(--brand-d);background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;transition:.15s}
+  .chip:hover{background:var(--brand);color:#fff}
+  form.input{display:flex;gap:8px;padding:12px 18px;border-top:1px solid var(--line);background:#fff}
+  input[type=text],textarea{flex:1;border:1px solid var(--line);border-radius:12px;padding:11px 14px;font:inherit;color:inherit;background:#fff}
+  input:focus,textarea:focus{outline:2px solid var(--brand);border-color:transparent}
+  button{font:inherit;cursor:pointer}
+  .btn{background:var(--brand);color:#fff;border:0;border-radius:12px;padding:10px 18px;font-weight:600}
+  .btn:hover{background:var(--brand-d)}
+  .btn.ghost{background:transparent;color:var(--brand-d);border:1px solid var(--line)}
+  .chat-head .btn.ghost{color:#fff;border-color:rgba(255,255,255,.45)}
+  .chat-head .btn.ghost:hover{background:rgba(255,255,255,.15)}
+  .btn.danger{background:#fff;color:#b3261e;border:1px solid #f0c9c6}
+  .contact{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:18px 0 0}
+  .contact a{text-decoration:none;font-weight:600;font-size:14px;padding:10px 18px;border-radius:999px;color:#fff;background:var(--brand-d)}
+  .contact a.wa{background:var(--wa)}
+  .contact a:hover{filter:brightness(.92)}
+  /* editor */
+  dialog{border:0;border-radius:18px;padding:0;width:min(720px,94vw);max-height:90vh;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  dialog::backdrop{background:rgba(31,27,58,.55)}
+  .dlg{display:flex;flex-direction:column;max-height:90vh}
+  .dlg h2{margin:0;padding:18px 20px;border-bottom:1px solid var(--line);font-size:18px;color:var(--brand-dd)}
+  .dlg .body{padding:16px 20px;overflow-y:auto}
+  .dlg .foot{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
+  .qa{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px;display:grid;gap:8px}
+  .qa label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px}
+  .qa input,.qa textarea{width:100%}
+  .qa textarea{min-height:70px;resize:vertical}
+  .qa .row{display:flex;justify-content:flex-end}
+  .hint{color:var(--muted);font-size:13px;margin:0 0 14px}
+  footer{text-align:center;color:var(--muted);font-size:13px;padding:10px 16px 30px}
+  @media(max-width:520px){.chat{height:calc(100vh - 150px)}.msg{max-width:90%}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <span class="brand">Bytesurge Travels</span>
+  <h1>✈️ Plan your trip with us</h1>
+  <p>Ask our travel assistant about Vietnam, Sri Lanka, South Korea, visas, bookings and more.</p>
+</header>
+
+<main>
+  <section class="chat" aria-label="Bytesurge Travels chatbot">
+    <div class="chat-head">
+      <div class="avatar">🧭</div>
+      <div><b id="botName">Bytesurge Travel Assistant</b><small>Online · replies instantly</small></div>
+      <button class="btn ghost" id="editBtn" type="button" hidden>✏️ Edit answers</button>
+    </div>
+    <div id="log" aria-live="polite"></div>
+    <div class="chips" id="chips"></div>
+    <form class="input" id="form" autocomplete="off">
+      <input type="text" id="text" placeholder="Type your question…" aria-label="Your question">
+      <button class="btn" type="submit">Send</button>
+    </form>
+  </section>
+  <div class="contact">
+    <a class="wa" href="https://wa.me/919004244967" target="_blank" rel="noopener">💬 Chat on WhatsApp</a>
+    <a href="tel:+919004244967">📞 +91 900 424 4967</a>
+  </div>
+</main>
+<footer>Answers are set by the Bytesurge Travels team. For anything else, contact us directly.</footer>
+
+<dialog id="dlg">
+  <div class="dlg">
+    <h2>Edit chatbot questions &amp; answers</h2>
+    <div class="body">
+      <p class="hint">Write each question and the exact answer you want the bot to give. Add extra <b>keywords</b> (comma-separated) so it also understands other ways customers ask the same thing. Changes are saved in this browser — use <b>Export</b> to copy them to your live website.</p>
+      <div>
+        <label style="font-size:12px;color:var(--muted)">Bot Name</label>
+        <input type="text" id="botNameInput" style="width:100%;margin-bottom:10px">
+        <label style="font-size:12px;color:var(--muted)">Greeting message</label>
+        <textarea id="greeting" style="width:100%;min-height:60px"></textarea>
+        <label style="font-size:12px;color:var(--muted);display:block;margin-top:10px">Reply when no answer matches</label>
+        <textarea id="fallback" style="width:100%;min-height:60px"></textarea>
+      </div>
+      <h3 style="margin:18px 0 10px">Questions</h3>
+      <div id="list"></div>
+      <button class="btn ghost" id="addBtn" type="button">＋ Add question</button>
+    </div>
+    <div class="foot">
+      <button class="btn" id="saveBtn" type="button">Save</button>
+      <button class="btn ghost" id="exportBtn" type="button">Export JSON</button>
+      <button class="btn ghost" id="importBtn" type="button">Import JSON</button>
+      <button class="btn danger" id="resetBtn" type="button">Reset</button>
+      <button class="btn ghost" id="closeBtn" type="button" style="margin-left:auto">Close</button>
+    </div>
+  </div>
+</dialog>
+<input type="file" id="file" accept="application/json" hidden>
+
+<script>
+const DEFAULTS = {
+  botName: "Bytesurge Travel Assistant",
+  greeting: "Hi! 👋 Welcome to Bytesurge Travels. I can help with Vietnam, Sri Lanka and South Korea trips, bookings, visas and more. Pick a question below or type your own.",
+  fallback: "Sorry, I don't have an answer for that yet. Please contact our team and we'll help you personally.",
+  qa: [
+    { q: "What destinations do you offer?", keywords: "destinations, places, where, countries, packages, vietnam, sri lanka, korea, asia, middle east, dmc",
+      a: "We are a destination management company (DMC) specialising in Vietnam, Sri Lanka and South Korea, with luxury travel planning across Asia and the Middle East. Tell us your budget and dates and we'll suggest the best fit." },
+    { q: "Do you plan custom itineraries?", keywords: "custom, personalised, personalized, itinerary, customize, tailor, luxury, honeymoon, family",
+      a: "Yes. Every itinerary is personalised around your dates, budget and interests — family holidays, honeymoons, luxury trips or group tours." },
+    { q: "Do you handle corporate travel?", keywords: "corporate, business, company, mice, group, team, office",
+      a: "Yes, we arrange corporate and group travel from Mumbai and across India. Share your requirements and we'll prepare a plan for your team." },
+    { q: "How do I book a trip?", keywords: "book, booking, reserve, reservation, how to book",
+      a: "Choose a destination, send us your travel dates and number of travellers, and pay a small advance to confirm. You'll receive your booking confirmation right away." },
+    { q: "What payment methods do you accept?", keywords: "payment, pay, upi, card, credit, debit, bank, price",
+      a: "We accept UPI, debit/credit cards and bank transfer." },
+    { q: "Can I cancel or get a refund?", keywords: "cancel, cancellation, refund, money back",
+      a: "Yes. Cancellations made well before departure get a refund as per our policy; closer to the travel date, cancellation charges apply." },
+    { q: "Do you help with visas?", keywords: "visa, passport, documents, immigration",
+      a: "Yes, we guide you on visa requirements and help with the paperwork for international trips." },
+    { q: "Are flights and hotels included?", keywords: "flight, hotel, stay, accommodation, included, inclusions",
+      a: "It depends on the package. Most include hotel stay, breakfast and local transfers. Flights can be added on request." },
+    { q: "How can I contact you?", keywords: "contact, phone, call, email, whatsapp, support, help, number, mumbai, office",
+      a: "You can call or WhatsApp us on +91 900 424 4967, or email us — our team replies within a few hours. We are based in Mumbai, India." }
+  ]
+};
+
+const KEY = "bytesurge-chatbot-v2";
+const PHONE = "+919004244967", WA = "https://wa.me/919004244967";
+let data = load();
+const $ = id => document.getElementById(id);
+const log = $("log"), chips = $("chips");
+
+if (location.hash === "#admin") $("editBtn").hidden = false;
+
+function load(){
+  try{ const s = JSON.parse(localStorage.getItem(KEY)); if(s && Array.isArray(s.qa)) return s; }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULTS));
+}
+function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(data)); }catch(e){} }
+
+/* ---------- chat ---------- */
+function add(text, who){
+  const d = document.createElement("div");
+  d.className = "msg " + who; d.textContent = text;
+  log.appendChild(d); log.scrollTop = log.scrollHeight; return d;
+}
+function addContactButtons(el){
+  el.appendChild(document.createElement("br"));
+  const w = document.createElement("a");
+  w.className = "cta"; w.href = WA; w.target = "_blank"; w.rel = "noopener"; w.textContent = "💬 WhatsApp us";
+  const c = document.createElement("a");
+  c.className = "cta call"; c.href = "tel:" + PHONE; c.textContent = "📞 Call us";
+  el.appendChild(w); el.appendChild(c);
+}
+function renderChips(){
+  chips.innerHTML = "";
+  data.qa.filter(x => x.q.trim()).forEach(x=>{
+    const b = document.createElement("button");
+    b.type="button"; b.className="chip"; b.textContent = x.q;
+    b.onclick = () => ask(x.q, x);
+    chips.appendChild(b);
+  });
+}
+
+const STOP = new Set("a an the is are do you i me my to of for and or in on can how what does it we with your please".split(" "));
+const tok = s => s.toLowerCase().replace(/[^a-z0-9\u0900-\u097f\s]/g," ").split(/\s+/).filter(w=>w && !STOP.has(w));
+
+function findAnswer(input){
+  const cleanInput = input.trim().toLowerCase();
+  const words = tok(input); 
+  
+  let best = null, bestScore = 0;
+  for(const item of data.qa){
+    if(!item.a.trim()) continue;
+    let score = 0;
+    const qText = item.q.trim().toLowerCase();
+    
+    // Exact or near-exact question match gets highest priority
+    if(cleanInput === qText || qText.includes(cleanInput) || cleanInput.includes(qText)){
+      score += 15;
+    }
+
+    const qWords = new Set(tok(item.q));
+    const kw = new Set(tok(item.keywords || ""));
+
+    for(const w of words){
+      if(qWords.has(w)) score += 3;
+      if(kw.has(w)) score += 4;
+      
+      // Partial matching for typed roots (e.g., "visas" matching "visa")
+      for(const k of kw){ 
+        if(k.length > 2 && (k.includes(w) || w.includes(k))){ 
+          score += 2; 
+          break; 
+        } 
+      }
+    }
+    if(score > bestScore){ bestScore = score; best = item; }
+  }
+  // Lowered threshold to 1 so even a single matched keyword/intent triggers the correct answer
+  return bestScore >= 1 ? best : null;
+}
+
+function ask(text, forced){
+  add(text, "me");
+  const t = add("Typing…", "bot typing");
+  setTimeout(()=>{
+    const hit = forced || findAnswer(text);
+    t.className = "msg bot"; 
+    t.textContent = hit ? hit.a : data.fallback;
+    if(!hit || /contact|whatsapp|phone|call/i.test(text)) {
+      addContactButtons(t);
+    }
+    log.scrollTop = log.scrollHeight;
+  }, 450);
+}
+
+$("form").addEventListener("submit", e=>{
+  e.preventDefault();
+  const v = $("text").value.trim(); if(!v) return;
+  $("text").value = ""; ask(v);
+});
+
+function start(){
+  $("botName").textContent = data.botName || DEFAULTS.botName;
+  log.innerHTML = ""; add(data.greeting, "bot"); renderChips();
+}
+
+/* ---------- editor ---------- */
+const dlg = $("dlg"), list = $("list");
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+function row(item={q:"",keywords:"",a:""}){
+  const d = document.createElement("div"); d.className = "qa";
+  d.innerHTML = `
+    <div><label>Question</label><input type="text" class="f-q" value="${esc(item.q)}"></div>
+    <div><label>Extra keywords (comma-separated)</label><input type="text" class="f-k" value="${esc(item.keywords||"")}"></div>
+    <div><label>Your answer</label><textarea class="f-a">${esc(item.a)}</textarea></div>
+    <div class="row"><button type="button" class="btn danger">Delete</button></div>`;
+  d.querySelector(".btn").onclick = () => d.remove();
+  list.appendChild(d);
+}
+function openEditor(){
+  $("botNameInput").value = data.botName || DEFAULTS.botName;
+  $("greeting").value = data.greeting; 
+  $("fallback").value = data.fallback;
+  list.innerHTML = ""; data.qa.forEach(row); dlg.showModal();
+}
+function collect(){
+  return {
+    botName: $("botNameInput").value.trim() || DEFAULTS.botName,
+    greeting: $("greeting").value.trim() || DEFAULTS.greeting,
+    fallback: $("fallback").value.trim() || DEFAULTS.fallback,
+    qa: [...list.querySelectorAll(".qa")].map(d=>({
+      q: d.querySelector(".f-q").value.trim(),
+      keywords: d.querySelector(".f-k").value.trim(),
+      a: d.querySelector(".f-a").value.trim()
+    })).filter(x=>x.q && x.a)
+  };
+}
+$("editBtn").onclick = openEditor;
+$("addBtn").onclick = () => { row(); list.lastChild.querySelector(".f-q").focus(); };
+$("saveBtn").onclick = () => { data = collect(); persist(); start(); dlg.close(); };
+$("closeBtn").onclick = () => dlg.close();
+$("resetBtn").onclick = () => {
+  if(confirm("Reset everything back to the default questions and answers?")){
+    data = JSON.parse(JSON.stringify(DEFAULTS)); persist(); start(); openEditor();
+  }
+};
+$("exportBtn").onclick = () => {
+  const blob = new Blob([JSON.stringify(collect(),null,2)],{type:"application/json"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = "chatbot-answers.json"; a.click(); URL.revokeObjectURL(a.href);
+};
+$("importBtn").onclick = () => $("file").click();
+$("file").onchange = e => {
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const j = JSON.parse(r.result);
+      if(!Array.isArray(j.qa)) throw 0;
+      data = { ...DEFAULTS, ...j }; persist(); start(); openEditor();
+    }catch(err){ alert("That file isn't a valid chatbot JSON."); }
+  };
+  r.readAsText(f); e.target.value = "";
+};
+start();
+</script>
+</body>
+</html>
